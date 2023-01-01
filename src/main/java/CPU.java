@@ -30,6 +30,14 @@ public class CPU {
 
     private static Logger logger = LoggerFactory.getLogger(CPU.class);
 
+    private enum Instructions {
+        CLS,
+        RET,
+        JP,
+        CALL,
+        RTS
+    }
+
     /**
      * Creates new Chip-8 CPU.
      * Address 0x200 is start of the program in memory.
@@ -52,15 +60,28 @@ public class CPU {
         short opcode = this.RAM[this.PC];
 
         // Decode instruction
-        logger.debug(""+String.format("0x%2X", opcode));
+        Instructions i = decode_instruction(opcode);
+        if (i != null)
+            logger.debug("Instructions: "+i);
+        else
+            logger.debug("Instructions: "+String.format("0x%04X", opcode));
 
         // TODO: Execute instruction
 
         this.PC += 1;
     }
 
-    private void decode_instruction(short opcode) {
-
+    private Instructions decode_instruction(short opcode) {
+        Instructions i = null;
+        switch (opcode) {
+            case 0x00E0:
+                i = Instructions.CLS;
+                break;
+            case 0x00EE:
+                i = Instructions.RTS;
+                break;
+        }
+        return i;
     }
 
     private void push(short value) {
