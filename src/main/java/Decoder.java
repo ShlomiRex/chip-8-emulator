@@ -215,12 +215,12 @@ public class Decoder {
         }
     }
 
-    private static Instruction.Operand decodeOperand(byte value) {
+    public static Instruction.Operand decodeOperand(byte value) {
         String op_str = "V" + value;
         return Instruction.Operand.valueOf(op_str);
     }
 
-    private static byte get_lsb(short input) {
+    public static byte get_lsb(short input) {
         return (byte) ((input << 8) >> 8);
     }
 
@@ -230,7 +230,7 @@ public class Decoder {
      * @param nibble_num
      * @return An octet. The octet value can be from 0 to 15, no more.
      */
-    private static byte get_nibble(short input, int nibble_num) {
+    public static byte get_nibble(short input, int nibble_num) {
         return switch (nibble_num) {
             case 1 -> (byte) (input & 0x000F);
             case 2 -> (byte) ((input & 0x00F0) >> 4);

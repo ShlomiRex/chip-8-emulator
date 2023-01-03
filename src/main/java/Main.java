@@ -1,10 +1,7 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HexFormat;
 
 public class Main {
@@ -45,7 +42,8 @@ public class Main {
         }
         logger.debug("Program first 16 bytes: " + first_16_bytes);
 
-        CPU cpu = new CPU(program);
+        Display display = new Display();
+        CPU cpu = new CPU(program, display);
 
         cpu.tick();
         cpu.tick();
