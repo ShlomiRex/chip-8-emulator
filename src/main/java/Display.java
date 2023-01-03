@@ -2,8 +2,8 @@
  * Display uses 64x32 monochrome panel. Each pixel is 1 or 0.
  */
 public class Display {
-    public static final int WIDTH = 64;
-    public static final int HEIGHT = 32;
+    public static final int COLS = 64;
+    public static final int ROWS = 32;
 
     // Rows: 32, Cols: 64
     private final boolean[][] pixels = new boolean[32][64];

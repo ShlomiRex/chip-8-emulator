@@ -1,4 +1,3 @@
-import jdk.jshell.spi.ExecutionControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -285,15 +284,15 @@ public class CPU {
             for more information on the Chip-8 screen and sprites.
              */
             registers[0xF] = 0;
-            byte xPos = (byte) (registers[x] % Display.WIDTH);
-            byte yPos = (byte) (registers[y] % Display.HEIGHT);
+            byte xPos = (byte) (registers[x] % Display.COLS);
+            byte yPos = (byte) (registers[y] % Display.ROWS);
             byte height = first_nibble;
 
             for (int row = 0; row < height; row++) {
                 byte spriteByte = this.RAM[this.I + row];
                 for (int col = 0; col < 8; col++) {
                     byte spritePixel = (byte) (spriteByte & (0x80 >> col)); // TODO: It should be boolean
-                    int pixel_index = (yPos + row) * Display.WIDTH + (xPos + col);
+                    int pixel_index = (yPos + row) * Display.COLS + (xPos + col);
                     boolean pixel = display.getPixel(row, col);
 
                     if (spritePixel != 0) {

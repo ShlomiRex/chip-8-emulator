@@ -1,113 +1,77 @@
-import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.system.MemoryStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.nio.IntBuffer;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.system.MemoryUtil.NULL;
+public class Window extends JPanel {
+    // Dynamic width, height of the window in pixels. User can resize window.
+    private int width = 600;
+    private int height = 600;
+    private final String title = "CHIP-8 Emulator - By Shlomi Domnenko";
 
-public class Window {
-    // The window handle
-    private long window;
+    private Display display;
+    private JFrame frame;
+    private static Logger logger = LoggerFactory.getLogger(Window.class);
 
-    public void run() {
-        System.out.println("Hello LWJGL " + Version.getVersion() + "!");
+    public Window(Display display) {
+        this.display = display;
 
-        init();
-        loop();
+        JFrame jframe = new JFrame(title);
+        jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jframe.add(this);
+        this.setBackground(Color.BLACK);
+        jframe.setSize(width, height);
+        jframe.setLocationRelativeTo(null);
+        jframe.setVisible(true);
 
-        // Free the window callbacks and destroy the window
-        glfwFreeCallbacks(window);
-        glfwDestroyWindow(window);
+        jframe.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                width = getWidth();
+                height = getHeight();
+            }
 
-        // Terminate GLFW and free the error callback
-        glfwTerminate();
-        glfwSetErrorCallback(null).free();
-    }
+            @Override
+            public void componentMoved(ComponentEvent e) {
 
-    private void init() {
-        // Setup an error callback. The default implementation
-        // will print the error message in System.err.
-        GLFWErrorCallback.createPrint(System.err).set();
+            }
 
-        // Initialize GLFW. Most GLFW functions will not work before doing this.
-        if ( !glfwInit() )
-            throw new IllegalStateException("Unable to initialize GLFW");
+            @Override
+            public void componentShown(ComponentEvent e) {
 
-        // Configure GLFW
-        glfwDefaultWindowHints(); // optional, the current window hints are already the default
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+            }
 
-        // Create the window
-        window = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
-        if ( window == NULL )
-            throw new RuntimeException("Failed to create the GLFW window");
+            @Override
+            public void componentHidden(ComponentEvent e) {
 
-        // Setup a key callback. It will be called every time a key is pressed, repeated or released.
-        glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
-                glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+            }
         });
-
-        // Get the thread stack and push a new frame
-        try ( MemoryStack stack = stackPush() ) {
-            IntBuffer pWidth = stack.mallocInt(1); // int*
-            IntBuffer pHeight = stack.mallocInt(1); // int*
-
-            // Get the window size passed to glfwCreateWindow
-            glfwGetWindowSize(window, pWidth, pHeight);
-
-            // Get the resolution of the primary monitor
-            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-            // Center the window
-            glfwSetWindowPos(
-                    window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
-            );
-        } // the stack frame is popped automatically
-
-        // Make the OpenGL context current
-        glfwMakeContextCurrent(window);
-        // Enable v-sync
-        glfwSwapInterval(1);
-
-        // Make the window visible
-        glfwShowWindow(window);
     }
 
-    private void loop() {
-        // This line is critical for LWJGL's interoperation with GLFW's
-        // OpenGL context, or any context that is managed externally.
-        // LWJGL detects the context that is current in the current thread,
-        // creates the GLCapabilities instance and makes the OpenGL
-        // bindings available for use.
-        GL.createCapabilities();
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
 
-        // Set the clear color
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        g.setColor(Color.WHITE);
 
-        // Run the rendering loop until the user has attempted to close
-        // the window or has pressed the ESCAPE key.
-        while ( !glfwWindowShouldClose(window) ) {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+        //g.fillRect(10, 10, 30, 30);
 
-            glfwSwapBuffers(window); // swap the color buffers
+        int col_width = width / Display.COLS;
+        int row_height = height / Display.ROWS;
 
-            // Poll for window events. The key callback above will only be
-            // invoked during this call.
-            glfwPollEvents();
+        for (int row = 0; row < Display.ROWS; row++) {
+            for (int col = 0; col < Display.COLS; col++) {
+                boolean pixel = display.getPixel(row, col);
+                if (!pixel)
+                    continue;
+                int x = col * col_width;
+                int y = row * row_height;
+                //logger.debug("Drawing pixel: (" + row + ", " + col+"), at window x,y: ("+x+", "+y+")");
+                g.fillRect(x, y, col_width, row_height);
+            }
         }
     }
-
-
 }

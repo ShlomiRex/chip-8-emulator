@@ -1,23 +1,8 @@
-import org.lwjgl.Version;
-import org.lwjgl.opengl.GL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HexFormat;
-
-import java.nio.*;
-
-import org.lwjgl.*;
-import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
-
-import static org.lwjgl.glfw.Callbacks.*;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.*;
-import static org.lwjgl.system.MemoryUtil.*;
 
 public class Main {
 
@@ -43,9 +28,7 @@ public class Main {
 
     }
 
-    public static void main(String[] args) throws IOException {
-        new Window().run();
-
+    public static void main(String[] args) {
         Logger logger = LoggerFactory.getLogger(Main.class);
 
         byte[] program = hexStringToByteArray("0x60 0x00 0x61 0x01 0x62 0x02 0x63 0x03 0x64 0x04 0x65 0x05");
@@ -62,6 +45,10 @@ public class Main {
         logger.debug("Program first 16 bytes: " + first_16_bytes);
 
         Display display = new Display();
+        Window window = new Window(display);
+        display.setPixel(0, 0, true);
+        display.setPixel(0, 1, false);
+        display.setPixel(0, 2, true);
         CPU cpu = new CPU(program, display);
 
         cpu.tick();
