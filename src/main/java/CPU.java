@@ -78,6 +78,8 @@ public class CPU {
         // Fetch next instruction
         short opcode = fetch_instruction();
 
+        this.PC += 2;
+
         // Decode instruction (for printing only)
         Instruction i = Decoder.decodeInstruction(opcode);
         logger.debug(String.format("0x%04X", opcode) + ": " + i);
@@ -85,7 +87,11 @@ public class CPU {
         // Execute instruction
         execute_instruction(opcode);
 
-        this.PC += 2;
+        // Post execution
+        if (delay_timer > 0)
+            delay_timer --;
+        if (sound_timer > 0)
+            sound_timer --;
     }
 
     /**
