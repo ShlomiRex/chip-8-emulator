@@ -27,18 +27,18 @@ public class BitHelper {
     }
 
     /**
-     * Returns octet given ocrent number.
+     * Returns nibble given the nibble number. Nibble number is ordered from right to left, like so: 4321
      * @param input
-     * @param octet_num
+     * @param nibble_num
      * @return An octet. The octet value can be from 0 to 15, no more.
      */
-    public static byte get_octet(short input, int octet_num) {
-        return switch (octet_num) {
+    public static byte get_nibble(short input, int nibble_num) {
+        return switch (nibble_num) {
             case 1 -> (byte) (input & 0x000F);
             case 2 -> (byte) ((input & 0x00F0) >> 4);
             case 3 -> (byte) ((input & 0x0F00) >> 8);
             case 4 -> (byte) ((input & 0xF000) >> 12);
-            default -> throw new IllegalArgumentException("Octet can be 1-4. Got: " + octet_num);
+            default -> throw new IllegalArgumentException("Octet can be 1-4. Got: " + nibble_num);
         };
     }
 }
