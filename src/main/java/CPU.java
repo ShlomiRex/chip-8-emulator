@@ -1,6 +1,8 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+
 public class CPU {
     /**
      * Registers
@@ -30,14 +32,6 @@ public class CPU {
 
     private static Logger logger = LoggerFactory.getLogger(CPU.class);
 
-    private enum Instructions {
-        CLS,
-        RET,
-        JP,
-        CALL,
-        RTS
-    }
-
     /**
      * Creates new Chip-8 CPU.
      * Address 0x200 is start of the program in memory.
@@ -56,32 +50,45 @@ public class CPU {
     public void tick() {
         logger.debug("Tick");
 
+        logger.debug("Registers: " + Arrays.toString(this.registers));
+        logger.debug("PC: " + String.format("0x%02X", this.PC));
+        logger.debug("SP: " + String.format("0x%02X", this.SP));
+
         // Fetch next instruction
-        short opcode = this.RAM[this.PC];
+        short opcode = fetch_instruction();
 
         // Decode instruction
-        Instructions i = decode_instruction(opcode);
-        if (i != null)
-            logger.debug("Instructions: "+i);
-        else
-            logger.debug("Instructions: "+String.format("0x%04X", opcode));
+        Instruction i = Instruction.decodeInstruction(opcode);
+        logger.debug(String.format("0x%04X", opcode) + ": " + i);
 
-        // TODO: Execute instruction
+        // Execute instruction
+        execute_instruction(i);
 
-        this.PC += 1;
+        this.PC += 2;
     }
 
-    private Instructions decode_instruction(short opcode) {
-        Instructions i = null;
-        switch (opcode) {
-            case 0x00E0:
-                i = Instructions.CLS;
-                break;
-            case 0x00EE:
-                i = Instructions.RTS;
-                break;
+    /**
+     * Fetches the instruction OPCODE at the current PC.
+     * @return
+     */
+    private short fetch_instruction() {
+        byte msb = this.RAM[this.PC];
+        byte lsb = this.RAM[this.PC+1];
+        return (short) ((msb << 8) + lsb);
+    }
+
+    private void execute_instruction(Instruction instruction) {
+        if (instruction == null) {
+            logger.error("Instruction given is null.");
+            return;
         }
-        return i;
+        switch(instruction.instruction) {
+            case LD:
+                this.registers[instruction.op1.ordinal()] = instruction.value;
+                break;
+            default:
+                logger.error("Instruction not yet supported");
+        }
     }
 
     private void push(short value) {
