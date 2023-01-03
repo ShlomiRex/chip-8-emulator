@@ -50,15 +50,17 @@ public class CPU {
     public void tick() {
         logger.debug("Tick");
 
-        logger.debug("Registers: " + Arrays.toString(this.registers));
-        logger.debug("PC: " + String.format("0x%02X", this.PC));
-        logger.debug("SP: " + String.format("0x%02X", this.SP));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(Arrays.toString(this.registers)).append("\t");
+        stringBuilder.append("PC: ").append(String.format("0x%02X", this.PC)).append("\t");
+        stringBuilder.append("SP: ").append(String.format("0x%02X", this.SP));
+        logger.debug(stringBuilder.toString());
 
         // Fetch next instruction
         short opcode = fetch_instruction();
 
         // Decode instruction
-        Instruction i = Instruction.decodeInstruction(opcode);
+        Instruction i = Decoder.decodeInstruction(opcode);
         logger.debug(String.format("0x%04X", opcode) + ": " + i);
 
         // Execute instruction
@@ -82,9 +84,19 @@ public class CPU {
             logger.error("Instruction given is null.");
             return;
         }
+
+        // Prefabricated objects / primitives to be used
+        short value = -1;
+        if (instruction.is_value_2_bytes)
+            value = instruction.extended_value;
+        else
+            value = instruction.value;
+
+        int register_index = instruction.op1.ordinal();
+
         switch(instruction.instruction) {
             case LD:
-                this.registers[instruction.op1.ordinal()] = instruction.value;
+                this.registers[register_index] = instruction.value;
                 break;
             default:
                 logger.error("Instruction not yet supported");
