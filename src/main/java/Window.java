@@ -5,8 +5,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class Window extends JPanel {
+public class Window extends JPanel implements PropertyChangeListener {
     // Dynamic width, height of the window in pixels. User can resize window.
     private int width = 600;
     private int height = 600;
@@ -55,6 +57,8 @@ public class Window extends JPanel {
     public void paint(Graphics g) {
         super.paint(g);
 
+        logger.debug("Drawing panel");
+
         g.setColor(Color.WHITE);
 
         //g.fillRect(10, 10, 30, 30);
@@ -62,16 +66,24 @@ public class Window extends JPanel {
         int col_width = width / Display.COLS;
         int row_height = height / Display.ROWS;
 
+        int num_on_pixels = 0;
         for (int row = 0; row < Display.ROWS; row++) {
             for (int col = 0; col < Display.COLS; col++) {
                 boolean pixel = display.getPixel(row, col);
                 if (!pixel)
                     continue;
+                num_on_pixels++;
                 int x = col * col_width;
                 int y = row * row_height;
                 //logger.debug("Drawing pixel: (" + row + ", " + col+"), at window x,y: ("+x+", "+y+")");
                 g.fillRect(x, y, col_width, row_height);
             }
         }
+        logger.debug("Number of drawn pixels: " + num_on_pixels);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
     }
 }

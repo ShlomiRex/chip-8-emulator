@@ -1,3 +1,6 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Display uses 64x32 monochrome panel. Each pixel is 1 or 0.
  */
@@ -7,6 +10,8 @@ public class Display {
 
     // Rows: 32, Cols: 64
     private final boolean[][] pixels = new boolean[32][64];
+
+    private static final Logger logger = LoggerFactory.getLogger(Display.class);
 
     // Clear display
     public void cls() {
@@ -21,5 +26,6 @@ public class Display {
 
     public void setPixel(int row, int col, boolean value) {
         pixels[row][col] = value;
+        logger.debug("Pixel set: ("+row+", "+col+") = " + value);
     }
 }

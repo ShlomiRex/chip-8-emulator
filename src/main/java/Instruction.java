@@ -87,7 +87,11 @@ public class Instruction {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.instruction.name()).append(" ");
+
         sb.append(this.op1).append(", ");
+        if (this.op2 != null) {
+            sb.append(this.op2).append(", ");
+        }
         sb.append(String.format("0x%02X", is_value_2_bytes ? this.extended_value : this.value));
 
         return sb.toString();

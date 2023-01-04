@@ -1,6 +1,7 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -31,14 +32,14 @@ public class CPU {
      */
     private final short[] stack = new short[16];
 
-    private static Logger logger = LoggerFactory.getLogger(CPU.class);
+    private static final Logger logger = LoggerFactory.getLogger(CPU.class);
 
     // Connected display, CPU will manipulate pixels.
-    private Display display;
+    private final Display display;
 
-    private Random random;
+    private final Random random;
 
-    private boolean[] keypad = new boolean[16];
+    private final boolean[] keypad = new boolean[16];
 
     /**
      * Creates new Chip-8 CPU.
@@ -68,11 +69,12 @@ public class CPU {
     public void tick() {
         logger.debug("Tick");
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(Arrays.toString(this.registers)).append("\t");
-        stringBuilder.append("PC: ").append(String.format("0x%02X", this.PC)).append("\t");
-        stringBuilder.append("SP: ").append(String.format("0x%02X", this.SP));
-        logger.debug(stringBuilder.toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append(Arrays.toString(this.registers)).append("\t\t");
+        sb.append("PC: ").append(String.format("0x%02X", this.PC)).append("\t");
+        sb.append("SP: ").append(String.format("0x%02X", this.SP)).append("\t");
+        sb.append("I: ").append(String.format("0x%02X", this.I));
+        logger.debug(sb.toString());
 
         // Fetch next instruction
         short opcode = fetch_instruction();
@@ -103,18 +105,22 @@ public class CPU {
         return (short) ((msb << 8) + lsb);
     }
 
-    private void execute_instruction(short opcode) {
-        byte x = Decoder.get_nibble(opcode, 3);
+    private void execute_instruction(short opcode_short) {
+        byte x = Decoder.get_nibble(opcode_short, 3);
         Instruction.Operand vx = Decoder.decodeOperand(x);
 
-        byte y = Decoder.get_nibble(opcode, 2);
+        byte y = Decoder.get_nibble(opcode_short, 2);
         Instruction.Operand vy = Decoder.decodeOperand(y);
 
-        byte kk = Decoder.get_lsb(opcode);
-        short nnn = (short) (opcode & 0x0FFF);
-        byte nn = Decoder.get_lsb(opcode);
-        short lsb = Decoder.get_lsb(opcode);
-        byte first_nibble = Decoder.get_nibble(opcode, 1);
+        byte kk = Decoder.get_lsb(opcode_short);
+        short nnn = (short) (opcode_short & 0x0FFF);
+        byte nn = Decoder.get_lsb(opcode_short);
+        short lsb = Decoder.get_lsb(opcode_short);
+        byte first_nibble = Decoder.get_nibble(opcode_short, 1);
+
+        // Java has no unsigned numbers. This is workaround.
+        String opcode_hex = String.format("%04X", opcode_short);
+        int opcode = Integer.parseInt(opcode_hex, 16);
 
         if (opcode < 0x1000) {
             if (opcode == 0x00E0) {
@@ -176,31 +182,27 @@ public class CPU {
             registers[x] += kk;
         } else if (opcode < 0x9000) {
             switch (lsb) {
-                case 0:
+                case 0 ->
                     // 8xy0 - LD Vx, Vy
                     // Set Vx = Vy.
                     // Stores the value of register Vy in register Vx.
-                    registers[x] = registers[y];
-                    break;
-                case 1:
+                        registers[x] = registers[y];
+                case 1 ->
                     // 8xy1 - OR Vx, Vy
                     // Set Vx = Vx OR Vy.
                     // Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. A bitwise OR compares the corrseponding bits from two values, and if either bit is 1, then the same bit in the result is also 1. Otherwise, it is 0.
-                    registers[x] |= registers[y];
-                    break;
-                case 2:
+                        registers[x] |= registers[y];
+                case 2 ->
                     // 8xy2 - AND Vx, Vy
                     // Set Vx = Vx AND Vy.
                     // Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
-                    registers[x] &= registers[y];
-                    break;
-                case 3:
+                        registers[x] &= registers[y];
+                case 3 ->
                     // 8xy3 - XOR Vx, Vy
                     // Set Vx = Vx XOR Vy.
                     // Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
-                    registers[x] ^= registers[y];
-                    break;
-                case 4:
+                        registers[x] ^= registers[y];
+                case 4 -> {
                     // 8xy4 - ADD Vx, Vy
                     // Set Vx = Vx + Vy, set VF = carry.
                     // The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
@@ -210,8 +212,8 @@ public class CPU {
                     else
                         registers[0xF] = 0;
                     registers[x] = (byte) (sum & 0xFF);
-                    break;
-                case 5:
+                }
+                case 5 -> {
                     // 8xy5 - SUB Vx, Vy
                     // Set Vx = Vx - Vy, set VF = NOT borrow.
                     // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
@@ -220,15 +222,15 @@ public class CPU {
                     else
                         registers[0xF] = 0;
                     registers[x] -= registers[y];
-                    break;
-                case 6:
+                }
+                case 6 -> {
                     // 8xy6 - SHR Vx {, Vy}
                     // Set Vx = Vx SHR 1.
                     // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
                     registers[0xF] = (byte) (registers[x] & 0x1);
                     registers[x] >>= 1;
-                    break;
-                case 7:
+                }
+                case 7 -> {
                     // 8xy7 - SUBN Vx, Vy
                     // Set Vx = Vy - Vx, set VF = NOT borrow.
                     // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
@@ -237,17 +239,18 @@ public class CPU {
                     else
                         registers[0xF] = 0;
                     registers[x] = (byte) (registers[y] - registers[x]);
-                    break;
-                case 0xE:
+                }
+                case 0xE -> {
                     // 8xyE - SHL Vx {, Vy}
                     // Set Vx = Vx SHL 1.
                     // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
                     registers[0xF] = (byte) ((registers[x] & 0x80) >> 7);
                     registers[x] <<= 1;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Impossible instruction, first octet not in range 0-7 and not equal to E. First octet: " + lsb);
-            };
+                }
+                default ->
+                        throw new IllegalArgumentException("Impossible instruction, first octet not in range 0-7 and not equal to E. First octet: " + lsb);
+            }
+            ;
         } else if (opcode < 0xA000) {
             // 9xy0 - SNE Vx, Vy
             // Skip next instruction if Vx != Vy.

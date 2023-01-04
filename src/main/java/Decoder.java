@@ -1,16 +1,20 @@
 public class Decoder {
-    public static Instruction decodeInstruction(short opcode) {
-        byte x = get_nibble(opcode, 3);
+    public static Instruction decodeInstruction(short opcode_short) {
+        byte x = get_nibble(opcode_short, 3);
         Instruction.Operand vx = decodeOperand(x);
 
-        byte y = get_nibble(opcode, 2);
+        byte y = get_nibble(opcode_short, 2);
         Instruction.Operand vy = decodeOperand(y);
 
-        short kk = get_lsb(opcode);
-        short nnn = (short) (opcode & 0x0FFF);
-        byte nn = get_lsb(opcode);
-        short lsb = get_lsb(opcode);
-        byte first_nibble = get_nibble(opcode, 1);
+        short kk = get_lsb(opcode_short);
+        short nnn = (short) (opcode_short & 0x0FFF);
+        byte nn = get_lsb(opcode_short);
+        short lsb = get_lsb(opcode_short);
+        byte first_nibble = get_nibble(opcode_short, 1);
+
+        // Java has no unsigned numbers. This is workaround.
+        String opcode_hex = String.format("%04X", opcode_short);
+        int opcode = Integer.parseInt(opcode_hex, 16);
 
         if (opcode < 0x1000) {
             if (opcode == 0x00E0) {
@@ -216,7 +220,7 @@ public class Decoder {
     }
 
     public static Instruction.Operand decodeOperand(byte value) {
-        String op_str = "V" + value;
+        String op_str = "V" + String.format("%01X", value);
         return Instruction.Operand.valueOf(op_str);
     }
 
