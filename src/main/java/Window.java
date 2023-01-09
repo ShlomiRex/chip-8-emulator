@@ -21,6 +21,18 @@ public class Window extends JPanel implements PropertyChangeListener {
     public Window(Display display) {
         this.display = display;
 
+        Thread thread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1);
+                    repaint();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        thread.start();
+
         JFrame jframe = new JFrame(title);
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jframe.add(this);
@@ -56,30 +68,39 @@ public class Window extends JPanel implements PropertyChangeListener {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-
-        logger.debug("Drawing panel");
+        drawGridLines(g); // TODO: Remove
 
         g.setColor(Color.WHITE);
-
-        //g.fillRect(10, 10, 30, 30);
-
+        
         int col_width = width / Display.COLS;
         int row_height = height / Display.ROWS;
 
-        int num_on_pixels = 0;
         for (int row = 0; row < Display.ROWS; row++) {
             for (int col = 0; col < Display.COLS; col++) {
                 boolean pixel = display.getPixel(row, col);
                 if (!pixel)
                     continue;
-                num_on_pixels++;
                 int x = col * col_width;
                 int y = row * row_height;
-                //logger.debug("Drawing pixel: (" + row + ", " + col+"), at window x,y: ("+x+", "+y+")");
                 g.fillRect(x, y, col_width, row_height);
             }
         }
-        logger.debug("Number of drawn pixels: " + num_on_pixels);
+    }
+
+    private void drawGridLines(Graphics g) {
+        g.setColor(Color.RED);
+        int col_width = width / Display.COLS;
+        int row_height = height / Display.ROWS;
+
+        for (int row = 0; row < Display.ROWS; row++) {
+            g.drawLine(0, row * row_height, Display.COLS * col_width, row * row_height);
+            for (int col = 0; col < Display.COLS; col++) {
+                g.drawLine(col * col_width, 0, col * col_width, Display.ROWS * row_height);
+            }
+        }
+        // Draw last lines (to close the grid)
+        g.drawLine(0, Display.ROWS * row_height, Display.COLS * col_width, Display.ROWS * row_height);
+        g.drawLine(Display.COLS * col_width, 0, Display.COLS * col_width, Display.ROWS * row_height);
     }
 
     @Override

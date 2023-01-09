@@ -1,0 +1,23 @@
+: esprite
+0xF8 0x80 0x80 0xF8 0x80 0x80 0xF8
+
+: main
+i  := esprite
+v0 := 0
+v1 := 0
+
+
+sprite v0 v1 7
+
+loop
+	sprite v0 v1 7
+	v0 += 1
+	sprite v0 v1 7
+	# lock the framerate of this program via the delay timer:
+	loop
+		vf := delay
+		if vf != 0 then
+	again
+	vf := 15
+	delay := vf
+again

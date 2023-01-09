@@ -45,7 +45,7 @@ public class CPU {
      * Creates new Chip-8 CPU.
      * Address 0x200 is start of the program in memory.
      */
-    public CPU(byte[] rom_program, Display display) {
+    public CPU(byte[] rom_program, int program_length, Display display) {
         this.SP = 0;
         this.PC = 0x200;
         this.display = display;
@@ -55,7 +55,7 @@ public class CPU {
         this.random = new Random(seed);
 
         // Load program
-        for (int i = 0; i < rom_program.length; i++)
+        for (int i = 0; i < program_length; i++)
             this.RAM[0x200 + i] = rom_program[i];
 
         // Load font palette
@@ -137,8 +137,9 @@ public class CPU {
                 // 0nnn - SYS addr
                 // Jump to a machine code routine at nnn.
                 // This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
-                // TODO: 03-Jan-23 Complete
-                throw new RuntimeException();
+
+                //throw new RuntimeException();
+                // Ignore!
             }
         } else if (opcode < 0x2000) {
             // 1nnn - JP addr
@@ -291,18 +292,20 @@ public class CPU {
             byte yPos = (byte) (registers[y] % Display.ROWS);
             byte height = first_nibble;
 
+            // Iterate over the sprite pixels (on, off per pixel)
             for (int row = 0; row < height; row++) {
                 byte spriteByte = this.RAM[this.I + row];
+                //String.format("0x%02X", this.RAM[this.I + row]) //TODO: Remove
                 for (int col = 0; col < 8; col++) {
-                    byte spritePixel = (byte) (spriteByte & (0x80 >> col)); // TODO: It should be boolean
-                    int pixel_index = (yPos + row) * Display.COLS + (xPos + col);
-                    boolean pixel = display.getPixel(row, col);
+                    // Get bit of current row, bit index is 'col'
+                    boolean spritePixel = (spriteByte & (0x80 >> col)) != 0;
+                    boolean pixel = display.getPixel(yPos + row, xPos + col);
 
-                    if (spritePixel != 0) {
+                    if (spritePixel) {
                         if (pixel)
                             registers[0xF] = 1;
-                        boolean a = pixel ^  true; // TODO: Something here
-                        display.setPixel(row, col, a);
+                        boolean pixel_xor = pixel ^  true; // TODO: Something here
+                        display.setPixel(yPos + row, xPos + col, pixel_xor);
                     }
                 }
             }

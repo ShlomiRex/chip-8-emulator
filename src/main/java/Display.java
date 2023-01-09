@@ -26,6 +26,6 @@ public class Display {
 
     public void setPixel(int row, int col, boolean value) {
         pixels[row][col] = value;
-        logger.debug("Pixel set: ("+row+", "+col+") = " + value);
+        //logger.debug("Pixel set: ("+row+", "+col+") = " + value);
     }
 }
