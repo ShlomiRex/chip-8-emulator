@@ -319,9 +319,14 @@ public class CPU {
              */
             instr = new Instruction(Instruction.Instructions.DRW, vx, vy, first_nibble);
             registers[0xF] = 0;
-            byte xPos = (byte) (registers[x] % Display.COLS);
-            byte yPos = (byte) (registers[y] % Display.ROWS);
+            // Transform signed byte to unsigned int
+            int registerX = registers[x] & 0xFF;
+            int registerY = registers[y] & 0xFF;
+
+            byte xPos = (byte) (registerX % Display.COLS);
+            byte yPos = (byte) (registerY % Display.ROWS);
             byte height = first_nibble;
+            logger.debug("(xPos, yPos) = ("+xPos+", "+yPos+")");
 
             // Iterate over the sprite pixels (on, off per pixel)
             for (int row = 0; row < height; row++) {

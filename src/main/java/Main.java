@@ -19,7 +19,7 @@ public class Main {
         return HexFormat.of().parseHex(new_s.toString());
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         Logger logger = LoggerFactory.getLogger(Main.class);
 
         // Read from ROM file
@@ -49,8 +49,18 @@ public class Main {
         logger.debug("Program first 16 bytes: " + first_16_bytes);
 
         Display display = new Display();
-        Window window = new Window(display);
-        CPU cpu = new CPU(program, bytes_read, display, window);
+
+        final Window[] window = new Window[1];
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                window[0] = new Window(display);
+            }
+        });
+        thread.start();
+        thread.join();
+
+        CPU cpu = new CPU(program, bytes_read, display, window[0]);
 
         // Custom program
 //        cpu.tick(); // v1 = random
