@@ -15,23 +15,10 @@ public class Window extends JPanel implements PropertyChangeListener {
     private final String title = "CHIP-8 Emulator - By Shlomi Domnenko";
 
     private Display display;
-    private JFrame frame;
     private static Logger logger = LoggerFactory.getLogger(Window.class);
 
     public Window(Display display) {
         this.display = display;
-
-//        Thread thread = new Thread(() -> {
-//            while (true) {
-//                try {
-//                    Thread.sleep(1);
-//                    repaint();
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        });
-//        thread.start();
 
         JFrame jframe = new JFrame(title);
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
