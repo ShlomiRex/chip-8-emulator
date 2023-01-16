@@ -50,7 +50,7 @@ public class Main {
 
         Display display = new Display();
         Window window = new Window(display);
-        CPU cpu = new CPU(program, bytes_read, display);
+        CPU cpu = new CPU(program, bytes_read, display, window);
 
         // Custom program
 //        cpu.tick(); // v1 = random
@@ -62,7 +62,7 @@ public class Main {
 
         // ROM tester program
         while (true) {
-            Thread.sleep(100);
+            Thread.sleep(2);
             cpu.tick();
         }
 //        cpu.tick();

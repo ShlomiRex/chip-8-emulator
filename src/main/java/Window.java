@@ -21,17 +21,17 @@ public class Window extends JPanel implements PropertyChangeListener {
     public Window(Display display) {
         this.display = display;
 
-        Thread thread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1);
-                    repaint();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        thread.start();
+//        Thread thread = new Thread(() -> {
+//            while (true) {
+//                try {
+//                    Thread.sleep(1);
+//                    repaint();
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        });
+//        thread.start();
 
         JFrame jframe = new JFrame(title);
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -71,7 +71,7 @@ public class Window extends JPanel implements PropertyChangeListener {
         drawGridLines(g); // TODO: Remove
 
         g.setColor(Color.WHITE);
-        
+
         int col_width = width / Display.COLS;
         int row_height = height / Display.ROWS;
 

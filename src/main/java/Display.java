@@ -21,10 +21,18 @@ public class Display {
     }
 
     public boolean getPixel(int row, int col) {
+        col = col % 64;
+        row = row % 32;
+        col = Math.abs(col);
+        row = Math.abs(row);
         return pixels[row][col];
     }
 
     public void setPixel(int row, int col, boolean value) {
+        col = col % 64;
+        row = row % 32;
+        col = Math.abs(col);
+        row = Math.abs(row);
         pixels[row][col] = value;
         //logger.debug("Pixel set: ("+row+", "+col+") = " + value);
     }

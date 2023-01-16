@@ -36,6 +36,8 @@ public class CPU {
 
     // Connected display, CPU will manipulate pixels.
     private final Display display;
+    // Control the window (java swing)
+    private final Window window;
 
     private final Random random;
 
@@ -45,10 +47,11 @@ public class CPU {
      * Creates new Chip-8 CPU.
      * Address 0x200 is start of the program in memory.
      */
-    public CPU(byte[] rom_program, int program_length, Display display) {
+    public CPU(byte[] rom_program, int program_length, Display display, Window window) {
         this.SP = 0;
         this.PC = 0x200;
         this.display = display;
+        this.window = window;
 
         // Start with known seed.
         long seed = 123;
@@ -127,6 +130,7 @@ public class CPU {
                 // 00E0 - CLS
                 // Clear the display.
                 this.display.cls();
+                this.window.repaint();
             } else if (opcode == 0x00EE) {
                 // 00EE - RET
                 // Return from a subroutine.
@@ -309,6 +313,7 @@ public class CPU {
                     }
                 }
             }
+            this.window.repaint();
         } else if (opcode < 0xF000) {
             byte key = registers[x];
             switch (lsb) {
