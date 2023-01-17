@@ -97,7 +97,7 @@ public class Instruction {
         }
 
         sb.append(String.format("0x%02X", is_value_2_bytes ? this.extended_value : this.value));
-
+        sb.append(" ("+(is_value_2_bytes ? this.extended_value : this.value)+")");
         return sb.toString();
     }
 }

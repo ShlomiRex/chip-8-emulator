@@ -451,7 +451,7 @@ public class CPU {
                         registers[i] = this.RAM[this.I + i];
                 }
                 default -> {
-                    throw new IllegalArgumentException("Can't decode opcode: " + String.format("0x%02", opcode));
+                    throw new IllegalArgumentException("Can't decode opcode: " + opcode_hex);
                 }
             };
         }
