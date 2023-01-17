@@ -42,13 +42,18 @@ public class Main {
 
         logger.debug("Loading ROM, bytes: " + bytes_read);
 
-        StringBuilder first_16_bytes = new StringBuilder();
-        for (int i = 0; i < bytes_read; i++) {
-            byte b = program[i];
-            String s = String .format("0x%02X", b);
-            first_16_bytes.append(s).append(" ");
+        StringBuilder program_bytes_str = new StringBuilder();
+        for (int i = 0; i < bytes_read; i+=2) {
+            byte msb = program[i];
+            byte lsb = program[i+1];
+
+            program_bytes_str
+                    .append("0x")
+                    .append(String.format("%02X", msb))
+                    .append(String.format("%02X", lsb))
+                    .append(" ");
         }
-        logger.debug("Program first 16 bytes: " + first_16_bytes);
+        logger.debug("Program bytes: " + program_bytes_str);
 
         Display display = new Display();
 
