@@ -30,17 +30,23 @@ public class Input extends KeyAdapter {
      */
     private final Map<Character, Integer> keypad_map;
 
+    private static final char[] allowed_keys = new char[]{
+            '1','2','3','4',
+            'q','w','e','r',
+            'a','s','d','f',
+            'z','x','c','v'
+    };
+
+    /**
+     * Responsible for handling keyboard input and mapping to CHIP-8 keypad.
+     */
     public Input() {
-        char[] map_keys = new char[]{
-                '1','2','3','4',
-                'q','w','e','r',
-                'a','s','d','f',
-                'z','x','c','v'
-        };
+        char[] map_keys = allowed_keys;
+
         char[] map_values = new char[]{
                 '1','2','3','c',
                 '4','5','6','d',
-                '7','8','9','E',
+                '7','8','9','e',
                 'a','0','b','f'
         };
 
@@ -52,8 +58,9 @@ public class Input extends KeyAdapter {
 
         // Keypad to Keypad index map
         Map<Character, Integer> keypad_map = new HashMap<>();
-        for(int i = 0; i < map_values.length; i++)
+        for(int i = 0; i < map_values.length; i++) {
             keypad_map.put(map_values[i], i);
+        }
         this.keypad_map = keypad_map;
     }
 
@@ -65,36 +72,36 @@ public class Input extends KeyAdapter {
     @Override
     public void keyPressed(KeyEvent e) {
         super.keyPressed(e);
-        boolean is_valid = is_valid_input(e.getKeyChar());
+        char keyboard_key = e.getKeyChar();
+        boolean is_valid = is_valid_input(keyboard_key);
         if (!is_valid)
             return;
-        logger.debug("Key pressed: '" + e.getKeyChar() + "'");
-
-        int keypad_index = this.keypad_map.get(e.getKeyChar());
+        // Convert keyboard key to keypad key
+        char mapped_keypad_key = this.keymap.get(keyboard_key);
+        // Convert keypad key to keypad index
+        int keypad_index = this.keypad_map.get(mapped_keypad_key);
+        logger.debug("Key pressed: '"+e.getKeyChar()+"' -> '"+mapped_keypad_key+"', keypad index: "+keypad_index);
         this.keypad[keypad_index] = true;
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         super.keyReleased(e);
-        boolean is_valid = is_valid_input(e.getKeyChar());
+        char keyboard_key = e.getKeyChar();
+        boolean is_valid = is_valid_input(keyboard_key);
         if (!is_valid)
             return;
-        logger.debug("Key released: '" + e.getKeyChar() + "'");
-
-        int keypad_index = this.keypad_map.get(e.getKeyChar());
+        // Convert keyboard key to keypad key
+        char mapped_keypad_key = this.keymap.get(keyboard_key);
+        // Convert keypad key to keypad index
+        int keypad_index = this.keypad_map.get(mapped_keypad_key);
+        logger.debug("Key released: '"+keyboard_key+"' -> '"+mapped_keypad_key+"', keypad index: "+keypad_index);
         this.keypad[keypad_index] = false;
     }
 
     public boolean is_valid_input(char keycode) {
-        char[] allowed = new char[]{
-                '1','2','3','4',
-                'q','w','e','r',
-                'a','s','d','f',
-                'z','x','c','v'
-        };
-        for (char c : allowed)
-            if (keycode == c || keycode == Character.toUpperCase(c))
+        for (char c : allowed_keys)
+            if (keycode == c)
                 return true;
         return false;
     }
