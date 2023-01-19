@@ -200,7 +200,7 @@ public class CPU {
             instr = new Instruction(Instruction.Instructions.ADD, vx, null, kk);
             registers[x] += kk;
         } else if (opcode < 0x9000) {
-            switch (lsb) {
+            switch (first_nibble) {
                 case 0 -> {
                     // 8xy0 - LD Vx, Vy
                     // Set Vx = Vy.

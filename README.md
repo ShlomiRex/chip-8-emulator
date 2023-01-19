@@ -1,6 +1,6 @@
 # CHIp-8 Emulator
 
-I wrote CHIP-8 emulator in Java as pre-requsits for my Nintendo Entertainment System emulator (NES) in Rust language.
+I wrote CHIP-8 emulator in Java as prerequisites for my Nintendo Entertainment System emulator (NES) in Rust language.
 
 # Images
 

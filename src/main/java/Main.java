@@ -5,9 +5,6 @@ import java.io.*;
 import java.util.HexFormat;
 
 public class Main {
-
-
-
     public static byte[] hexStringToByteArray(String s) {
         StringBuilder new_s = new StringBuilder();
         for (int i = 0; i < s.length(); i+=5) {
@@ -57,6 +54,7 @@ public class Main {
 
         Display display = new Display();
 
+        //TODO: Do something here, don't instantiate Window like this.
         final Window[] window = new Window[1];
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -69,27 +67,9 @@ public class Main {
 
         CPU cpu = new CPU(program, bytes_read, display, window[0]);
 
-        // Custom program
-//        cpu.tick(); // v1 = random
-//        cpu.tick(); // v2 = random
-//        cpu.tick(); // i = sprite location
-//        cpu.tick(); // draw player
-//        cpu.tick(); // erase player
-//        cpu.tick(); // Load 5 into V0
-
-        // ROM tester program
         while (true) {
-            Thread.sleep(100);
+            Thread.sleep(10);
             cpu.tick();
         }
-//        cpu.tick();
-//        cpu.tick();
-//        cpu.tick();
-//        cpu.tick();
-//        cpu.tick();
-//        cpu.tick();
-//        cpu.tick();
-//        cpu.tick();
-//        cpu.tick();
     }
 }
