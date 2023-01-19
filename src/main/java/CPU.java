@@ -102,12 +102,10 @@ public class CPU {
         byte msb = this.RAM[this.PC];
         byte lsb = this.RAM[this.PC+1];
 
-        short s_msb = (short) (msb << 8);
-        short s_lsb = lsb;
-        short ret = (short) (s_msb + s_lsb);
+        short ret = (short)(((msb & 0xFF) << 8) | (lsb & 0xFF));
 
-        //short ret = (short) ((msb << 8) + lsb);
         logger.debug("Fetching: " + String.format("0x%04X", ret));
+        //logger.debug("Fetching: 0x" + String.format("%02X", msb) + String.format("%02X", lsb));
         return ret;
     }
 
