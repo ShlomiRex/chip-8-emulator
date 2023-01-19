@@ -17,7 +17,7 @@ public class Window extends JPanel implements PropertyChangeListener {
     private Display display;
     private static Logger logger = LoggerFactory.getLogger(Window.class);
 
-    public Window(Display display) {
+    public Window(Display display, Input input) {
         this.display = display;
 
         JFrame jframe = new JFrame(title);
@@ -27,6 +27,8 @@ public class Window extends JPanel implements PropertyChangeListener {
         jframe.setSize(width, height);
         jframe.setLocationRelativeTo(null);
         jframe.setVisible(true);
+
+        jframe.addKeyListener(input);
 
         jframe.addComponentListener(new ComponentListener() {
             @Override

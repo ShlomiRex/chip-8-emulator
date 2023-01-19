@@ -1,7 +1,6 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -32,6 +31,8 @@ public class CPU {
      */
     private final short[] stack = new short[16];
 
+    private boolean[] keypad = new boolean[16];
+
     private static final Logger logger = LoggerFactory.getLogger(CPU.class);
 
     // Connected display, CPU will manipulate pixels.
@@ -41,17 +42,18 @@ public class CPU {
 
     private final Random random;
 
-    private final boolean[] keypad = new boolean[16];
+    private final Input input;
 
     /**
      * Creates new Chip-8 CPU.
      * Address 0x200 is start of the program in memory.
      */
-    public CPU(byte[] rom_program, int program_length, Display display, Window window) {
+    public CPU(byte[] rom_program, int program_length, Display display, Window window, Input input) {
         this.SP = 0;
         this.PC = 0x200;
         this.display = display;
         this.window = window;
+        this.input = input;
 
         // Start with known seed.
         long seed = 123;
@@ -78,6 +80,9 @@ public class CPU {
         sb.append("SP: ").append(String.format("0x%02X", this.SP)).append("\t");
         sb.append("I: ").append(String.format("0x%02X", this.I));
         logger.debug(sb.toString());
+
+        // Update current keypad
+        this.keypad = this.input.get_keypad();
 
         // Fetch next instruction
         short opcode = fetch_instruction();
@@ -354,26 +359,27 @@ public class CPU {
             this.window.repaint();
         } else if (opcode < 0xF000) {
             byte key = registers[x];
-            switch (lsb) {
-                case 0x9E:
+            switch (lsb & 0xFF) {
+                case 0x9E -> {
                     // Ex9E - SKP Vx
                     // Skip next instruction if key with the value of Vx is pressed.
                     // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
                     instr = new Instruction(Instruction.Instructions.SKP, vx, null);
                     if (keypad[key])
                         PC += 2;
-                    break;
-                case 0xA1:
+                }
+                case 0xA1 -> {
                     // ExA1 - SKNP Vx
                     // Skip next instruction if key with the value of Vx is not pressed.
                     // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
                     instr = new Instruction(Instruction.Instructions.SKNP, vx, null);
-                    if ( ! keypad[key])
+                    if (!keypad[key])
                         PC += 2;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Impossible instruction, first octet isn't 0x9E or 0xA1, first octet: " + lsb);
-            };
+                }
+                default ->
+                        throw new IllegalArgumentException("Impossible instruction, first octet isn't 0x9E or 0xA1, first octet: " + lsb);
+            }
+            ;
         } else {
             switch (lsb) {
                 case 0x07 -> {
@@ -434,7 +440,9 @@ public class CPU {
                     // The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
                     instr = new Instruction(Instruction.Instructions.LD, Instruction.Operand.B, vx);
                     byte b_value = registers[x];
-                    int value = b_value & 0xFF; // TODO:
+
+                    // I do this conversion because if the value is -119 for example, the number should be 137 in unsigned, and so it must have digits 1,3,7 placed into RAM
+                    int value = b_value & 0xFF;
 
                     logger.debug("BCD Instruction, value = " + value);
 
@@ -473,12 +481,12 @@ public class CPU {
         logger.debug(String.format("0x%04X", opcode) + ": " + instr);
     }
 
-    public Instruction.Operand decodeOperand(byte value) {
+    private Instruction.Operand decodeOperand(byte value) {
         String op_str = "V" + String.format("%01X", value);
         return Instruction.Operand.valueOf(op_str);
     }
 
-    public byte get_lsb(short input) {
+    private byte get_lsb(short input) {
         return (byte) ((input << 8) >> 8);
     }
 
@@ -488,7 +496,7 @@ public class CPU {
      * @param nibble_num
      * @return An octet. The octet value can be from 0 to 15, no more.
      */
-    public byte get_nibble(short input, int nibble_num) {
+    private byte get_nibble(short input, int nibble_num) {
         return switch (nibble_num) {
             case 1 -> (byte) (input & 0x000F);
             case 2 -> (byte) ((input & 0x00F0) >> 4);
