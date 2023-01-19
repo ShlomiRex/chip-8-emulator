@@ -110,6 +110,7 @@ public class CPU {
     }
 
     private void execute_instruction(short opcode_short) {
+        logger.debug("Executing");
         byte x = get_nibble(opcode_short, 3);
         Instruction.Operand vx = decodeOperand(x);
 
@@ -432,12 +433,21 @@ public class CPU {
                     // Store BCD representation of Vx in memory locations I, I+1, and I+2.
                     // The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
                     instr = new Instruction(Instruction.Instructions.LD, Instruction.Operand.B, vx);
-                    byte value = registers[x];
+                    byte b_value = registers[x];
+                    int value = b_value & 0xFF; // TODO:
+
+                    logger.debug("BCD Instruction, value = " + value);
+
                     this.RAM[this.I + 2] = (byte) (value % 10);
+                    logger.debug("RAM[I+2] = " + this.RAM[this.I + 2]);
+
                     value /= 10;
                     this.RAM[this.I + 1] = (byte) (value % 10);
+                    logger.debug("RAM[I+1] = " + this.RAM[this.I + 1]);
+
                     value /= 10;
                     this.RAM[this.I] = (byte) (value % 10);
+                    logger.debug("RAM[I] = " + this.RAM[this.I]);
                 }
                 case 0x55 -> {
                     // Fx55 - LD [I], Vx
