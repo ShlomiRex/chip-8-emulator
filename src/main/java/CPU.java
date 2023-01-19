@@ -55,6 +55,9 @@ public class CPU {
         this.window = window;
         this.input = input;
 
+        // Set the reference of keypad (once) to input, instead of copying every tick.
+        this.keypad = this.input.get_keypad();
+
         // Start with known seed.
         long seed = 123;
         this.random = new Random(seed);
@@ -72,17 +75,17 @@ public class CPU {
      * Single clock cycle.
      */
     public void tick() {
-        logger.debug("Tick");
+        //logger.debug("Tick");
 
         StringBuilder sb = new StringBuilder();
         sb.append(Arrays.toString(this.registers)).append("\t\t");
         sb.append("PC: ").append(String.format("0x%02X", this.PC)).append("\t");
         sb.append("SP: ").append(String.format("0x%02X", this.SP)).append("\t");
         sb.append("I: ").append(String.format("0x%02X", this.I));
-        logger.debug(sb.toString());
+        //logger.debug(sb.toString());
 
         // Update current keypad
-        this.keypad = this.input.get_keypad();
+        // This is done automatically, this.keypad is referencing Input.keypad .
 
         // Fetch next instruction
         short opcode = fetch_instruction();
@@ -90,7 +93,8 @@ public class CPU {
         this.PC += 2;
 
         // Execute instruction
-        execute_instruction(opcode);
+        Instruction instruction = execute_instruction(opcode);
+        //logger.debug(String.format("0x%04X", opcode) + ": " + instruction);
 
         // Post execution
         if (delay_timer > 0)
@@ -109,13 +113,12 @@ public class CPU {
 
         short ret = (short)(((msb & 0xFF) << 8) | (lsb & 0xFF));
 
-        logger.debug("Fetching: " + String.format("0x%04X", ret));
-        //logger.debug("Fetching: 0x" + String.format("%02X", msb) + String.format("%02X", lsb));
+        //logger.debug("Fetching: " + String.format("0x%04X", ret));
         return ret;
     }
 
-    private void execute_instruction(short opcode_short) {
-        logger.debug("Executing");
+    private Instruction execute_instruction(short opcode_short) {
+        //logger.debug("Executing");
         byte x = get_nibble(opcode_short, 3);
         Instruction.Operand vx = decodeOperand(x);
 
@@ -337,7 +340,6 @@ public class CPU {
             byte xPos = (byte) (registerX % Display.COLS);
             byte yPos = (byte) (registerY % Display.ROWS);
             byte height = first_nibble;
-            logger.debug("(xPos, yPos) = ("+xPos+", "+yPos+")");
 
             // Iterate over the sprite pixels (on, off per pixel)
             for (int row = 0; row < height; row++) {
@@ -478,7 +480,7 @@ public class CPU {
                 }
             };
         }
-        logger.debug(String.format("0x%04X", opcode) + ": " + instr);
+        return instr;
     }
 
     private Instruction.Operand decodeOperand(byte value) {

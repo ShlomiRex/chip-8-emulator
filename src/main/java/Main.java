@@ -61,22 +61,11 @@ public class Main {
 
         Display display = new Display();
         Input input = new Input();
+        Window window = new Window(display, input);
 
-        //TODO: Do something here, don't instantiate Window like this.
-        final Window[] window = new Window[1];
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                window[0] = new Window(display, input);
-            }
-        });
-        thread.start();
-        thread.join();
-
-        CPU cpu = new CPU(program, bytes_read, display, window[0], input);
+        CPU cpu = new CPU(program, bytes_read, display, window, input);
 
         while (true) {
-            Thread.sleep(10);
             cpu.tick();
         }
     }

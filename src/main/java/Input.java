@@ -14,21 +14,7 @@ public class Input extends KeyAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(Input.class);
 
-    /**
-     * Maps keyboard input to the CHIP-8 keypad. Key map:
-     * Chip-8 Key  Keyboard
-     * ----------  ---------
-     *   1 2 3 C    1 2 3 4
-     *   4 5 6 D    q w e r
-     *   7 8 9 E    a s d f
-     *   A 0 B F    z x c v
-     */
-    private final Map<Character, Character> keymap;
-
-    /**
-     * Maps keypad key to keypad index (0-16).
-     */
-    private final Map<Character, Integer> keypad_map;
+    private final Map<Character, Integer> keyboard_to_keypad_index_map;
 
     private static final char[] allowed_keys = new char[]{
             '1','2','3','4',
@@ -39,29 +25,35 @@ public class Input extends KeyAdapter {
 
     /**
      * Responsible for handling keyboard input and mapping to CHIP-8 keypad.
+     * Map:
+     * Chip-8 Key  Keyboard
+     * ----------  ---------
+     *   1 2 3 C    1 2 3 4
+     *   4 5 6 D    q w e r
+     *   7 8 9 E    a s d f
+     *   A 0 B F    z x c v
      */
     public Input() {
-        char[] map_keys = allowed_keys;
+        keyboard_to_keypad_index_map = new HashMap<>();
+        keyboard_to_keypad_index_map.put('1', 1);
+        keyboard_to_keypad_index_map.put('2', 2);
+        keyboard_to_keypad_index_map.put('3', 3);
+        keyboard_to_keypad_index_map.put('4', 0xC);
 
-        char[] map_values = new char[]{
-                '1','2','3','c',
-                '4','5','6','d',
-                '7','8','9','e',
-                'a','0','b','f'
-        };
+        keyboard_to_keypad_index_map.put('q', 4);
+        keyboard_to_keypad_index_map.put('w', 5);
+        keyboard_to_keypad_index_map.put('e', 6);
+        keyboard_to_keypad_index_map.put('r', 0xD);
 
-        // Keyboard to Keypad map
-        Map<Character, Character> keymap = new HashMap<>();
-        for(int i = 0; i < map_keys.length; i++)
-            keymap.put(map_keys[i], map_values[i]);
-        this.keymap = keymap;
+        keyboard_to_keypad_index_map.put('a', 7);
+        keyboard_to_keypad_index_map.put('s', 8);
+        keyboard_to_keypad_index_map.put('d', 9);
+        keyboard_to_keypad_index_map.put('f', 0xE);
 
-        // Keypad to Keypad index map
-        Map<Character, Integer> keypad_map = new HashMap<>();
-        for(int i = 0; i < map_values.length; i++) {
-            keypad_map.put(map_values[i], i);
-        }
-        this.keypad_map = keypad_map;
+        keyboard_to_keypad_index_map.put('z', 0xA);
+        keyboard_to_keypad_index_map.put('x', 0);
+        keyboard_to_keypad_index_map.put('c', 0xB);
+        keyboard_to_keypad_index_map.put('v', 0xF);
     }
 
     @Override
@@ -77,10 +69,11 @@ public class Input extends KeyAdapter {
         if (!is_valid)
             return;
         // Convert keyboard key to keypad key
-        char mapped_keypad_key = this.keymap.get(keyboard_key);
+        //char mapped_keypad_key = this.keymap.get(keyboard_key);
         // Convert keypad key to keypad index
-        int keypad_index = this.keypad_map.get(mapped_keypad_key);
-        logger.debug("Key pressed: '"+e.getKeyChar()+"' -> '"+mapped_keypad_key+"', keypad index: "+keypad_index);
+        //int keypad_index = this.keypad_map.get(mapped_keypad_key);
+        //logger.debug("Key pressed: '"+e.getKeyChar()+"' -> '"+mapped_keypad_key+"', keypad index: "+keypad_index);
+        int keypad_index = this.keyboard_to_keypad_index_map.get(keyboard_key);
         this.keypad[keypad_index] = true;
     }
 
@@ -92,10 +85,11 @@ public class Input extends KeyAdapter {
         if (!is_valid)
             return;
         // Convert keyboard key to keypad key
-        char mapped_keypad_key = this.keymap.get(keyboard_key);
+        //char mapped_keypad_key = this.keymap.get(keyboard_key);
         // Convert keypad key to keypad index
-        int keypad_index = this.keypad_map.get(mapped_keypad_key);
-        logger.debug("Key released: '"+keyboard_key+"' -> '"+mapped_keypad_key+"', keypad index: "+keypad_index);
+        //int keypad_index = this.keypad_map.get(mapped_keypad_key);
+        //logger.debug("Key released: '"+keyboard_key+"' -> '"+mapped_keypad_key+"', keypad index: "+keypad_index);
+        int keypad_index = this.keyboard_to_keypad_index_map.get(keyboard_key);
         this.keypad[keypad_index] = false;
     }
 
