@@ -55,7 +55,7 @@ public class Window extends JPanel implements PropertyChangeListener {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        drawGridLines(g); // TODO: Remove
+        //drawGridLines(g); // TODO: Remove
 
         g.setColor(Color.WHITE);
 

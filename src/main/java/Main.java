@@ -21,8 +21,8 @@ public class Main {
         Logger logger = LoggerFactory.getLogger(Main.class);
 
         // Read from ROM file
-        //String ch8Program = "test_rom/test_opcode.ch8";
-        String ch8Program = "other_roms/IBM Logo.ch8";
+        String ch8Program = "test_rom/test_opcode.ch8";
+        //String ch8Program = "other_roms/IBM Logo.ch8";
         InputStream inputStream = Main.class.getClassLoader().getResourceAsStream(ch8Program);
         byte[] program = new byte[4096];
         int bytes_read = inputStream.read(program);
